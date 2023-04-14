@@ -32,7 +32,7 @@ while (rawPile.length < 15){
 for(let i = 5; i >= 1; i--){
 
     pile.push(rawPile.slice(0,i));
-
+    rawPile = rawPile.slice(i);
 }
 console.log(pile)
 
@@ -40,15 +40,19 @@ console.log(pile)
 // 'div is called 'stacks''
 // each box is called stacks[i] 1-5
 
-let stacks = [];
-for (let i = 1; i <= 5; i++) {
-  stacks.push($('#stack' + i));
-}
+let stack1 = document.getElementById('stack1');
+// stack 1 will be pile[0]
+let image = document.createElement('img');
+image.src = `cards/${pile[0][0]}.svg`;
+image.alt = 'card';
+console.log(image)
+let h1 = document.createElement('h1')
+h1.textContent = 'ur a fucking retard and should kys'
+stack1.append(image);
 
-// Loop over the stacks and add an image to each one
-stacks.forEach(function(stack) {
-    stack.append(`<img src="cards/${stacks[0][0]}.svg">`);
-  });
+
+
+console.log(pile[0][0]);
 
 
 
