@@ -92,15 +92,6 @@ console.log(pile);
 // 'div is called 'stacks''
 // each box is called stacks[i] 1-5
 
-let stack1 = document.getElementById("stack1");
-let stack2 = document.getElementById("stack2");
-let stack3 = document.getElementById("stack3");
-let stack4 = document.getElementById("stack4");
-let stack5 = document.getElementById("stack5");
-
-let pile1 = document.getElementById("pile1");
-let pile2 = document.getElementById("pile2");
-
 let $image;
 
 function updateStacks() {
@@ -109,21 +100,40 @@ function updateStacks() {
     console.log(pileIndex);
     let imgSrc = `cards/${pileIndex}.svg`;
     $image = $("<img>").attr("src", imgSrc);
-    $image.draggable({
-      revert: "invalid"
-    });
     $(`#stack${i + 1}`).append($image);
   }
 }
 
-function makeDragable(){
-  for(let i=0;i<2;i++){
-    $(`#pile${i+1}`).droppable({
-      drop: function(event, ui){
+function makeDragable() {
+  for (let i = 0; i < 2; i++) {
+    $(`#pile${i + 1}`).droppable({
+      drop: function (event, ui) {
         let dropped = ui.draggable;
-        $(this).append(dropped);
-      }
-    })
+        let pile = $(this);
+        pile.empty();
+
+
+        dropped.css({
+          top: 0 + "px",
+          left: 0 + "px"
+        });
+
+        pile.append(dropped);
+        dropped.draggable("disable");
+      },
+    });
+  }
+
+
+  for (let i = 0; i < 5; i++) {
+    $(`#stack${i + 1} img`).draggable({
+      revert: "invalid",
+      stop: function (event, ui) {
+        if (ui.helper.dropped) {
+          $(this).draggable("disable");
+        }
+      },
+    });
   }
 
 }
