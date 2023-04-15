@@ -72,21 +72,21 @@ let player2 = cards.slice(splitIndex);
 // 15 cards in a pile
 
 let rawPile = [];
-let pile = [];
+let currentHand = [];
 
-// make the pile array of m[] with 5 arrays
+// make the pile
 while (rawPile.length < 15) {
   const card = player1.shift();
   rawPile.push(card);
 }
 
-// makes them into an array
+// makes them into an array of arrays
 
 for (let i = 5; i >= 1; i--) {
-  pile.push(rawPile.slice(0, i));
+  currentHand.push(rawPile.slice(0, i));
   rawPile = rawPile.slice(i);
 }
-console.log(pile);
+console.log(currentHand);
 
 // render to dom
 // 'div is called 'stacks''
@@ -96,11 +96,15 @@ let $image;
 
 function updateStacks() {
   for (let i = 0; i < 5; i++) {
-    let pileIndex = pile[i][0];
-    console.log(pileIndex);
-    let imgSrc = `cards/${pileIndex}.svg`;
-    $image = $("<img>").attr("src", imgSrc);
-    $(`#stack${i + 1}`).append($image);
+    if ($(`#stack${i + 1}`).children().length == 0) {
+      let pileIndex = currentHand[i][0];
+      console.log(pileIndex);
+      let imgSrc = `cards/${pileIndex}.svg`;
+      $image = $("<img>").attr("src", imgSrc);
+      $(`#stack${i + 1}`).append($image);
+    } else {
+      continue;
+    }
   }
 }
 
@@ -108,26 +112,40 @@ function makeDragable() {
   for (let i = 0; i < 2; i++) {
     $(`#pile${i + 1}`).droppable({
       drop: function (event, ui) {
+        let originalParent = ui.helper.data("origin");
         let dropped = ui.draggable;
         let pile = $(this);
         pile.empty();
 
-
         dropped.css({
           top: 0 + "px",
-          left: 0 + "px"
+          left: 0 + "px",
         });
+
+        // delete the dropped element from the array
+
+        let lastChar = originalParent.slice(-1);
+        let delIndex = parseInt(lastChar) - 1;
+        console.log(delIndex);
+        currentHand[delIndex].splice(0, 1);
+
+        console.log(currentHand);
 
         pile.append(dropped);
         dropped.draggable("disable");
+
+        // this is temporary need to fix this
+        updateStacks();
+        makeDragable();
       },
     });
   }
-
-
   for (let i = 0; i < 5; i++) {
     $(`#stack${i + 1} img`).draggable({
       revert: "invalid",
+      start: function (event, ui) {
+        $(ui.helper).data("origin", this.parentElement.id);
+      },
       stop: function (event, ui) {
         if (ui.helper.dropped) {
           $(this).draggable("disable");
@@ -135,8 +153,32 @@ function makeDragable() {
       },
     });
   }
+}
+
+function checkValid(current, newcard) {
+
+  // the 10 is a 1 cause we are only reading the first char of the cards 
+  let order = ['2','3','4','5','6','7','8','9','1','j','q','k'];
+  currentCard = current[0];
+  newCard = newcard[0];
+
+  currentIndex = order.indexOf(currentCard);
+  NewIndex = order.indexOf(newCard);
+
+  console.log(currentCard,newCard)
+  console.log(typeof(current))
+
+  // GET INDEX OF NEW AND CURRENT CARDS CHECK THAT THEY ARE WITHIN ONE OF EACH OTHER 
+  // UNLESS ITS K OR 2 THEN NEED TO VALIDATE 
+
+
 
 }
+
+checkValid(  "jack_of_spades",
+"king_of_clubs",)
+checkValid("10_of_spades",
+"2_of_clubs")
 
 updateStacks();
 makeDragable();
