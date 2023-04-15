@@ -5,6 +5,11 @@
 // add event listners so cards can be placed in piles
 // create logic so that checks if card is either + or -1 of card that is currently placed
 // make cards dragable and upadte logic if cards are within 1 index of one another
+let rawPile = [];
+let currentHand = [];
+let leftPile = [];
+let rightPile = [];
+let pileIndex;
 
 let cards = [
   "10_of_clubs",
@@ -61,47 +66,43 @@ let cards = [
   "queen_of_spades",
 ];
 
-// shuffle the list
-cards.sort(() => Math.random() - 0.5);
+function prepareCards() {
+  cards.sort(() => Math.random() - 0.5);
 
-// splits deck for two players
-const splitIndex = Math.floor(cards.length / 2);
-let player1 = cards.slice(0, splitIndex);
-let player2 = cards.slice(splitIndex);
+  // splits deck for two players
+  const splitIndex = Math.floor(cards.length / 2);
+  let player1 = cards.slice(0, splitIndex);
+  let player2 = cards.slice(splitIndex);
 
-// 15 cards in a pile
+  // 15 cards in a pile
 
-let rawPile = [];
-let currentHand = [];
+  // make the pile
+  while (rawPile.length < 15) {
+    const card = player1.shift();
+    rawPile.push(card);
+  }
 
-// make the pile
-while (rawPile.length < 15) {
-  const card = player1.shift();
-  rawPile.push(card);
+  // makes them into an array of arrays
+
+  for (let i = 5; i >= 1; i--) {
+    currentHand.push(rawPile.slice(0, i));
+    rawPile = rawPile.slice(i);
+  }
 }
-
-// makes them into an array of arrays
-
-for (let i = 5; i >= 1; i--) {
-  currentHand.push(rawPile.slice(0, i));
-  rawPile = rawPile.slice(i);
-}
-console.log(currentHand);
-
-// render to dom
-// 'div is called 'stacks''
-// each box is called stacks[i] 1-5
 
 let $image;
 
 function updateStacks() {
   for (let i = 0; i < 5; i++) {
     if ($(`#stack${i + 1}`).children().length == 0) {
-      let pileIndex = currentHand[i][0];
-      console.log(pileIndex);
-      let imgSrc = `cards/${pileIndex}.svg`;
-      $image = $("<img>").attr("src", imgSrc);
-      $(`#stack${i + 1}`).append($image);
+      pileIndex = currentHand[i][0];
+      if (typeof pileIndex === "undefined") {
+        continue;
+      } else {
+        let imgSrc = `cards/${pileIndex}.svg`;
+        $image = $("<img>").attr("src", imgSrc);
+        $(`#stack${i + 1}`).append($image);
+      }
     } else {
       continue;
     }
@@ -114,6 +115,63 @@ function makeDragable() {
       drop: function (event, ui) {
         let originalParent = ui.helper.data("origin");
         let dropped = ui.draggable;
+
+        let imgSrc = dropped.attr("src");
+        let imgName = imgSrc.split("/").pop().split(".")[0];
+
+        if (i == 0) {
+          // need to somehow get the card that was just added to the pile and append it here
+          leftPile.push(imgName);
+          // if empty it can go easy
+          if (leftPile.length > 1) {
+            console.log(
+              leftPile[leftPile.length - 1],
+              leftPile[leftPile.length - 2]
+            );
+            if (
+              checkValid(
+                leftPile[leftPile.length - 1],
+                leftPile[leftPile.length - 2]
+              )
+            ) {
+              console.log("order is ok and the card is allowed there");
+            } else {
+              $(dropped).draggable("option", "revert", true);
+              leftPile.pop()
+              return;
+            }
+          }
+        }
+        
+        if (i == 1) {
+          // need to somehow get the card that was just added to the pile and append it here
+          rightPile.push(imgName);
+          // if empty it can go easy
+          if (rightPile.length > 1) {
+            console.log(
+              rightPile[rightPile.length - 1],
+              rightPile[rightPile.length - 2]
+            );
+            if (
+              checkValid(
+                rightPile[rightPile.length - 1],
+                rightPile[rightPile.length - 2]
+              )
+            ) {
+              console.log("order is ok and the card is allowed there");
+            } else {
+              $(dropped).draggable("option", "revert", true);
+              rightPile.pop()
+              return;
+            }
+          }
+        }
+
+
+        //  the array doesnt need to store more than 2 arrays at a time right
+
+        // now LOGIC
+
         let pile = $(this);
         pile.empty();
 
@@ -123,15 +181,17 @@ function makeDragable() {
         });
 
         // delete the dropped element from the array
+        // add the new element
+        // save the old element so we can check the logic when comparing it to the new element
 
         let lastChar = originalParent.slice(-1);
         let delIndex = parseInt(lastChar) - 1;
-        console.log(delIndex);
         currentHand[delIndex].splice(0, 1);
 
-        console.log(currentHand);
+        console.log(leftPile);
 
         pile.append(dropped);
+
         dropped.draggable("disable");
 
         // this is temporary need to fix this
@@ -156,29 +216,24 @@ function makeDragable() {
 }
 
 function checkValid(current, newcard) {
-
-  // the 10 is a 1 cause we are only reading the first char of the cards 
-  let order = ['2','3','4','5','6','7','8','9','1','j','q','k'];
+  // the 10 is a 1 cause we are only reading the first char of the cards
+  let order = ["2", "3", "4", "5", "6", "7", "8", "9", "1", "j", "q", "k", "a"];
   currentCard = current[0];
   newCard = newcard[0];
 
   currentIndex = order.indexOf(currentCard);
   NewIndex = order.indexOf(newCard);
+  console.log(currentIndex, NewIndex);
 
-  console.log(currentCard,newCard)
-  console.log(typeof(current))
-
-  // GET INDEX OF NEW AND CURRENT CARDS CHECK THAT THEY ARE WITHIN ONE OF EACH OTHER 
-  // UNLESS ITS K OR 2 THEN NEED TO VALIDATE 
-
-
-
+  if (currentIndex - NewIndex === 1 || currentIndex - NewIndex === -1) {
+    console.log("order ok");
+    return true;
+  } else {
+    console.log("not ok");
+    return false;
+  }
 }
 
-checkValid(  "jack_of_spades",
-"king_of_clubs",)
-checkValid("10_of_spades",
-"2_of_clubs")
-
+prepareCards();
 updateStacks();
 makeDragable();
