@@ -1,15 +1,12 @@
-// randomise all cards in array
-// split array in two
-// set players cards to one array with 5 smaller arrays in it eg [[1,2,3,4,5][1,2,3,4]etc]
-// render cards into html using the dom
-// add event listners so cards can be placed in piles
-// create logic so that checks if card is either + or -1 of card that is currently placed
-// make cards dragable and upadte logic if cards are within 1 index of one another
+// need to make buttons to flip piles if theres no valid moves
+
 let rawPile = [];
 let currentHand = [];
 let leftPile = [];
 let rightPile = [];
 let pileIndex;
+let player1;
+let player2;
 
 let cards = [
   "10_of_clubs",
@@ -71,8 +68,8 @@ function prepareCards() {
 
   // splits deck for two players
   const splitIndex = Math.floor(cards.length / 2);
-  let player1 = cards.slice(0, splitIndex);
-  let player2 = cards.slice(splitIndex);
+  player1 = cards.slice(0, splitIndex);
+  player2 = cards.slice(splitIndex);
 
   // 15 cards in a pile
 
@@ -120,9 +117,7 @@ function makeDragable() {
         let imgName = imgSrc.split("/").pop().split(".")[0];
 
         if (i == 0) {
-          // need to somehow get the card that was just added to the pile and append it here
           leftPile.push(imgName);
-          // if empty it can go easy
           if (leftPile.length > 1) {
             console.log(
               leftPile[leftPile.length - 1],
@@ -137,16 +132,14 @@ function makeDragable() {
               console.log("order is ok and the card is allowed there");
             } else {
               $(dropped).draggable("option", "revert", true);
-              leftPile.pop()
+              leftPile.pop();
               return;
             }
           }
         }
-        
+
         if (i == 1) {
-          // need to somehow get the card that was just added to the pile and append it here
           rightPile.push(imgName);
-          // if empty it can go easy
           if (rightPile.length > 1) {
             console.log(
               rightPile[rightPile.length - 1],
@@ -161,16 +154,11 @@ function makeDragable() {
               console.log("order is ok and the card is allowed there");
             } else {
               $(dropped).draggable("option", "revert", true);
-              rightPile.pop()
+              rightPile.pop();
               return;
             }
           }
         }
-
-
-        //  the array doesnt need to store more than 2 arrays at a time right
-
-        // now LOGIC
 
         let pile = $(this);
         pile.empty();
@@ -212,6 +200,27 @@ function makeDragable() {
         }
       },
     });
+    $(`#stack${i + 1} img`).droppable({
+      revert: "invalid",
+      drop: function (event, ui) {
+        let originalParent = ui.helper.data("origin");
+        let dropped = ui.draggable;
+
+        let imgSrc = dropped.attr("src");
+        let imgName = imgSrc.split("/").pop().split(".")[0];
+
+        // append image
+
+        $(`#stack${i + 1} img`).append(imgName);
+
+        // delete from original stack
+        let lastChar = originalParent.slice(-1);
+        let delIndex = parseInt(lastChar) - 1;
+        currentHand[delIndex].splice(0, 1);
+
+        // add to new stack
+      },
+    });
   }
 }
 
@@ -221,6 +230,12 @@ function checkValid(current, newcard) {
   currentCard = current[0];
   newCard = newcard[0];
 
+  if (
+    (currentCard == "2" && newCard == "a") ||
+    (newCard == "2" && currentCard == "a")
+  ) {
+    return true;
+  }
   currentIndex = order.indexOf(currentCard);
   NewIndex = order.indexOf(newCard);
   console.log(currentIndex, NewIndex);
@@ -237,3 +252,53 @@ function checkValid(current, newcard) {
 prepareCards();
 updateStacks();
 makeDragable();
+
+// get button in html tick
+// now we need to make it so when the button is flipped the two piles change from the first card in the player 2 hands
+
+console.log(player1, player2);
+
+$("#button").click(function () {
+  console.log("button clicked");
+  // change both piles to first index of player1 and player2 decks
+  if (player1.length !== 0) {
+    leftPile.push(player1[0]);
+    player1.shift();
+    $("#pile1").empty();
+    leftPileSrc = `cards/${leftPile[leftPile.length - 1]}.svg`;
+    leftImage = $("<img>").attr("src", leftPileSrc);
+    $("#pile1").append(leftImage);
+  }
+  if (player2.length !== 0) {
+    rightPile.push(player2[0]);
+
+    player2.shift();
+
+    console.log(leftPile, rightPile);
+    // update images as well
+    // remove the current image
+
+    $("#pile2").empty();
+    //display new image
+
+    rightPileSrc = `cards/${rightPile[rightPile.length - 1]}.svg`;
+
+    rightImage = $("<img>").attr("src", rightPileSrc);
+
+    $("#pile2").append(rightImage);
+  }
+
+  if(player1.length == 0 && player2.length == 0){
+    alert('no more cards in stack')
+  }
+});
+
+// need to make it so that same cards can be stacked on top of one another
+
+// need to make it so that theres a really shitty ai that players player 2 can just set it to delay
+
+// make css better
+
+// make rounds and distribute cards baseed on who won (got rid of all cards first)
+
+
