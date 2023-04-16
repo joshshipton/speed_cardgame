@@ -4,3 +4,6 @@ im also learning jquery's gui library for the first time and im finding it super
 this project is dealing a lot with arrays and checking the logic of wheteher a card is allowed to go where it wants to
 im enjoying the problem solving aspect of this project it kind of feels like doing a ton of little data-strucutres and algorithm problems back to back in conjuction with one another 
 in order to get the whole mechanic of the game to work the way it is intended to work
+
+first limitation so far, no stacking cards atm have tried to impliment it for the last couple hours 
+have tried a bunch of different ways but no beuno so im shelving the mechanic for now 

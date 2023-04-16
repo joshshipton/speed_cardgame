@@ -7,6 +7,8 @@ let rightPile = [];
 let pileIndex;
 let player1;
 let player2;
+let card;
+let $image;
 
 let cards = [
   "10_of_clubs",
@@ -65,31 +67,23 @@ let cards = [
 
 function prepareCards() {
   cards.sort(() => Math.random() - 0.5);
-
   // splits deck for two players
   const splitIndex = Math.floor(cards.length / 2);
   player1 = cards.slice(0, splitIndex);
   player2 = cards.slice(splitIndex);
-
-  // 15 cards in a pile
-
   // make the pile
   while (rawPile.length < 15) {
     const card = player1.shift();
     rawPile.push(card);
   }
-
   // makes them into an array of arrays
-
   for (let i = 5; i >= 1; i--) {
     currentHand.push(rawPile.slice(0, i));
     rawPile = rawPile.slice(i);
   }
 }
 
-let $image;
-
-function updateStacks() {
+function updateEmptyStacks() {
   for (let i = 0; i < 5; i++) {
     if ($(`#stack${i + 1}`).children().length == 0) {
       pileIndex = currentHand[i][0];
@@ -112,78 +106,42 @@ function makeDragable() {
       drop: function (event, ui) {
         let originalParent = ui.helper.data("origin");
         let dropped = ui.draggable;
-
         let imgSrc = dropped.attr("src");
         let imgName = imgSrc.split("/").pop().split(".")[0];
-
         if (i == 0) {
           leftPile.push(imgName);
           if (leftPile.length > 1) {
-            console.log(
-              leftPile[leftPile.length - 1],
-              leftPile[leftPile.length - 2]
-            );
-            if (
-              checkValid(
-                leftPile[leftPile.length - 1],
-                leftPile[leftPile.length - 2]
-              )
-            ) {
-              console.log("order is ok and the card is allowed there");
-            } else {
+            if (!checkValid(leftPile[leftPile.length - 1],leftPile[leftPile.length - 2])
+            ){
               $(dropped).draggable("option", "revert", true);
               leftPile.pop();
-              return;
-            }
-          }
-        }
-
+              return;  
+            }}};
         if (i == 1) {
           rightPile.push(imgName);
           if (rightPile.length > 1) {
-            console.log(
-              rightPile[rightPile.length - 1],
-              rightPile[rightPile.length - 2]
-            );
-            if (
-              checkValid(
-                rightPile[rightPile.length - 1],
-                rightPile[rightPile.length - 2]
-              )
-            ) {
-              console.log("order is ok and the card is allowed there");
-            } else {
+            if (!checkValid(rightPile[rightPile.length - 1],rightPile[rightPile.length - 2])
+            ){
               $(dropped).draggable("option", "revert", true);
               rightPile.pop();
               return;
-            }
-          }
-        }
+            }}};
 
         let pile = $(this);
         pile.empty();
-
         dropped.css({
           top: 0 + "px",
           left: 0 + "px",
         });
 
-        // delete the dropped element from the array
-        // add the new element
-        // save the old element so we can check the logic when comparing it to the new element
-
         let lastChar = originalParent.slice(-1);
         let delIndex = parseInt(lastChar) - 1;
         currentHand[delIndex].splice(0, 1);
-
-        console.log(leftPile);
-
         pile.append(dropped);
-
         dropped.draggable("disable");
 
         // this is temporary need to fix this
-        updateStacks();
+        updateEmptyStacks();
         makeDragable();
       },
     });
@@ -209,16 +167,27 @@ function makeDragable() {
         let imgSrc = dropped.attr("src");
         let imgName = imgSrc.split("/").pop().split(".")[0];
 
-        // append image
-
+        // check if cards are the same and if they are reveal a new card
         $(`#stack${i + 1} img`).append(imgName);
 
         // delete from original stack
         let lastChar = originalParent.slice(-1);
         let delIndex = parseInt(lastChar) - 1;
-        currentHand[delIndex].splice(0, 1);
+        card = currentHand[delIndex].splice(0, 1);
+
+        // i have the stack its from so I can just get the first index from the array inside the array and move that to the new array of the array
+
+        console.log(currentHand)
+        console.log(card)
+
+
+        // append it to the right list 
+        // check if theyre the same
+        
+        
 
         // add to new stack
+        // need to check that theyre the same 
       },
     });
   }
@@ -238,7 +207,7 @@ function checkValid(current, newcard) {
   }
   currentIndex = order.indexOf(currentCard);
   NewIndex = order.indexOf(newCard);
-  console.log(currentIndex, NewIndex);
+  // console.log(currentIndex, NewIndex);
 
   if (currentIndex - NewIndex === 1 || currentIndex - NewIndex === -1) {
     console.log("order ok");
@@ -250,13 +219,11 @@ function checkValid(current, newcard) {
 }
 
 prepareCards();
-updateStacks();
+console.log(currentHand)
+updateEmptyStacks();
 makeDragable();
 
-// get button in html tick
-// now we need to make it so when the button is flipped the two piles change from the first card in the player 2 hands
 
-console.log(player1, player2);
 
 $("#button").click(function () {
   console.log("button clicked");
@@ -275,11 +242,8 @@ $("#button").click(function () {
     player2.shift();
 
     console.log(leftPile, rightPile);
-    // update images as well
-    // remove the current image
 
     $("#pile2").empty();
-    //display new image
 
     rightPileSrc = `cards/${rightPile[rightPile.length - 1]}.svg`;
 
@@ -292,13 +256,4 @@ $("#button").click(function () {
     alert('no more cards in stack')
   }
 });
-
-// need to make it so that same cards can be stacked on top of one another
-
-// need to make it so that theres a really shitty ai that players player 2 can just set it to delay
-
-// make css better
-
-// make rounds and distribute cards baseed on who won (got rid of all cards first)
-
 
