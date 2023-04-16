@@ -1,9 +1,14 @@
 // need to make buttons to flip piles if theres no valid moves
 
 let rawPile = [];
+let oppRawPile = [];
+
+let oppCurrentHand = [];
 let currentHand = [];
 let leftPile = [];
 let rightPile = [];
+
+let oppPileIndex;
 let pileIndex;
 let player1;
 let player2;
@@ -76,11 +81,22 @@ function prepareCards() {
     const card = player1.shift();
     rawPile.push(card);
   }
+  while (oppRawPile.length < 15) {
+    const card = player2.shift();
+    oppRawPile.push(card);
+  }
   // makes them into an array of arrays
   for (let i = 5; i >= 1; i--) {
     currentHand.push(rawPile.slice(0, i));
     rawPile = rawPile.slice(i);
   }
+
+  for (let i = 5; i >= 1; i--) {
+    oppCurrentHand.push(oppRawPile.slice(0, i));
+    oppRawPile = oppRawPile.slice(i);
+  }
+  
+
 }
 
 function updateEmptyStacks() {
@@ -97,6 +113,20 @@ function updateEmptyStacks() {
     } else {
       continue;
     }
+
+    if ($(`#oppStack${i + 1}`).children().length == 0) {
+      oppPileIndex = oppCurrentHand[i][0];
+      if (typeof oppPileIndex === "undefined") {
+        continue;
+      } else {
+        let oppImgSrc = `cards/${oppPileIndex}.svg`;
+        opp$image = $("<img>").attr("src", oppImgSrc);
+        $(`#oppStack${i + 1}`).append(opp$image);
+      }
+    } else {
+      continue;
+    }
+
   }
 }
 
