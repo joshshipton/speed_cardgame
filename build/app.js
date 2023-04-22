@@ -287,3 +287,11 @@ $("#button").click(function () {
   }
 });
 
+// made ai make moves
+//  make it look at cards from left to right waiting a second before looking at the next
+// if its playable then play
+// if no playable cards then let it make an aniamation that it wants to flip
+
+function aI(){
+  console.log()
+}
