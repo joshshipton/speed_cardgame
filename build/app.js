@@ -95,11 +95,10 @@ function prepareCards() {
     oppCurrentHand.push(oppRawPile.slice(0, i));
     oppRawPile = oppRawPile.slice(i);
   }
-  
-
 }
 
 function updateEmptyStacks() {
+
   for (let i = 0; i < 5; i++) {
     if ($(`#stack${i + 1}`).children().length == 0) {
       pileIndex = currentHand[i][0];
@@ -113,12 +112,21 @@ function updateEmptyStacks() {
     } else {
       continue;
     }
+  }
+}
 
+function updateOppEmptyStacks() {
+
+
+  for (let i = 0; i < 5; i++) {
     if ($(`#oppStack${i + 1}`).children().length == 0) {
+      console.log("RUNRUNRUNRUNRUN");
       oppPileIndex = oppCurrentHand[i][0];
       if (typeof oppPileIndex === "undefined") {
+        console.log("problemproblemproblem");
         continue;
       } else {
+        console.log("WEEWOOWEEWOOWEEWOO");
         let oppImgSrc = `cards/${oppPileIndex}.svg`;
         opp$image = $("<img>").attr("src", oppImgSrc);
         $(`#oppStack${i + 1}`).append(opp$image);
@@ -126,7 +134,6 @@ function updateEmptyStacks() {
     } else {
       continue;
     }
-
   }
 }
 
@@ -141,21 +148,33 @@ function makeDragable() {
         if (i == 0) {
           leftPile.push(imgName);
           if (leftPile.length > 1) {
-            if (!checkValid(leftPile[leftPile.length - 1],leftPile[leftPile.length - 2])
-            ){
+            if (
+              !checkValid(
+                leftPile[leftPile.length - 1],
+                leftPile[leftPile.length - 2]
+              )
+            ) {
               $(dropped).draggable("option", "revert", true);
               leftPile.pop();
-              return;  
-            }}};
+              return;
+            }
+          }
+        }
         if (i == 1) {
           rightPile.push(imgName);
           if (rightPile.length > 1) {
-            if (!checkValid(rightPile[rightPile.length - 1],rightPile[rightPile.length - 2])
-            ){
+            if (
+              !checkValid(
+                rightPile[rightPile.length - 1],
+                rightPile[rightPile.length - 2]
+              )
+            ) {
               $(dropped).draggable("option", "revert", true);
               rightPile.pop();
               return;
-            }}};
+            }
+          }
+        }
 
         let pile = $(this);
         pile.empty();
@@ -207,17 +226,14 @@ function makeDragable() {
 
         // i have the stack its from so I can just get the first index from the array inside the array and move that to the new array of the array
 
-        console.log(currentHand)
-        console.log(card)
+        console.log(currentHand);
+        console.log(card);
 
-
-        // append it to the right list 
+        // append it to the right list
         // check if theyre the same
-        
-        
 
         // add to new stack
-        // need to check that theyre the same 
+        // need to check that theyre the same
       },
     });
   }
@@ -248,13 +264,6 @@ function checkValid(current, newcard) {
   }
 }
 
-prepareCards();
-console.log(currentHand)
-updateEmptyStacks();
-makeDragable();
-
-
-
 $("#button").click(function () {
   console.log("button clicked");
   // change both piles to first index of player1 and player2 decks
@@ -282,8 +291,8 @@ $("#button").click(function () {
     $("#pile2").append(rightImage);
   }
 
-  if(player1.length == 0 && player2.length == 0){
-    alert('no more cards in stack')
+  if (player1.length == 0 && player2.length == 0) {
+    alert("no more cards in stack");
   }
 });
 
@@ -292,6 +301,56 @@ $("#button").click(function () {
 // if its playable then play
 // if no playable cards then let it make an aniamation that it wants to flip
 
-function aI(){
-  console.log()
+function aI() {
+  let currentLeftCard = leftPile[leftPile.length - 1];
+  let currentRightCard = rightPile[rightPile.length - 1];
+  console.log(currentLeftCard, currentRightCard);
+
+  for (let i = 0; i < oppCurrentHand.length; i++) {
+    let pile = oppCurrentHand[i][0];
+    if (checkValid(pile, currentLeftCard)) {
+      leftPile.push(pile);
+      oppCurrentHand[i].splice(0, 1);
+      $(`#oppStack${i + 1}`).empty();
+      $(`#pile1`).empty();
+      let pileSrc = `cards/${pile}.svg`;
+      let pileImage = $("<img>").attr("src", pileSrc);
+      $(`#pile1`).append(pileImage);
+      break;
+    }
+    if (checkValid(pile, currentRightCard)) {
+      rightPile.push(pile);
+      oppCurrentHand[i].splice(0, 1);
+      $(`#oppStack${i + 1}`).empty();
+      $(`#pile2`).empty();
+      let pileSrc = `cards/${pile}.svg`;
+      let pileImage = $("<img>").attr("src", pileSrc);
+      $(`#pile2`).append(pileImage);
+      break;
+    }
+  }
+
+  updateOppEmptyStacks();
 }
+
+setInterval(aI, 2000);
+setInterval(() => {
+  console.log(currentHand);
+}, 10000);
+
+// start game functions
+prepareCards();
+updateEmptyStacks();
+updateOppEmptyStacks();
+makeDragable();
+
+// to do for next time 
+// implement this to check for winner and loser const arrayOfArrays = [[], [], []];
+
+// const allSubArraysAreEmpty = arrayOfArrays.every(subArray => subArray.length === 0);
+
+// if (allSubArraysAreEmpty) {
+//   console.log("All of the sub-arrays are empty.");
+// }
+
+// can make rounds so that the game goes on for longer 
