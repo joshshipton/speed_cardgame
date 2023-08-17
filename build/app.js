@@ -1,7 +1,5 @@
 // need to make buttons to flip piles if theres no valid moves
 
-// today when a round is over distribute bigger pile to loser and smaller pile to winner, have a pop up with you won, bigger deck x cards smaller deck y cards and then a button to "go next round"
-
 let rawPile = [];
 let oppRawPile = [];
 
@@ -335,21 +333,7 @@ function aI() {
   updateOppEmptyStacks();
 }
 
-
-function CheckWinner(){
-  // checks winner, if winner sends alert + distributes cards for the next round
-  let allSubArraysAreEmpty = currentHand.every(subArray => subArray.length === 0);
-
-  if(allSubArraysAreEmpty){
-    console.log("Player has gotten rid of all their cards")
-    alert(`You won, left pile had {cards} right pile had {cards} you take the right pile you know have {cards} and opponent has {cards} press ok to go to the next round`)
-  }
-  
-
-}
-
 setInterval(aI, 2000);
-setInterval(CheckWinner, 2000)
 setInterval(() => {
   console.log(currentHand);
 }, 10000);
@@ -359,8 +343,6 @@ prepareCards();
 updateEmptyStacks();
 updateOppEmptyStacks();
 makeDragable();
-
-
 
 // to do for next time 
 // implement this to check for winner and loser const arrayOfArrays = [[], [], []];
